@@ -18,7 +18,6 @@ router.post('/', (req, res) => {
 });
 
 router.post('/register', (req,res) => {
-    let emailExists;
     console.log(req.body);
     let registerdata = new registerModel({
         name : 12345,
@@ -26,11 +25,13 @@ router.post('/register', (req,res) => {
         password: '3456'
     });
 
-    registerModel.find({ email: "test1@gmail.com" }, (err, data) => {
-        if(data.length != 0)
+    registerModel.findOne({ email: "tes1t@gmail.com" }, (err, data) => {
+        if(data)
         {
-            res.status(200).json({ data: 'Email Already Exists'});
+            console.log(data);
+            res.status(200).json({ data: `${registerdata.email} Already Exists`});
         } else {
+            console.log(data);
             let ciphertext = CryptoJS.AES.encrypt(registerdata.password, config.secretKey); // encrypt password
             // let bytes  = CryptoJS.AES.decrypt(ciphertext, config.secretKey).toString(CryptoJS.enc.Utf8); //decrypt password
         
@@ -43,6 +44,17 @@ router.post('/register', (req,res) => {
             // });
         
             res.status(200).json({ data : 'Registration Successful'});
+        }
+    });
+});
+
+router.post('/login', (req,res) => {
+
+    registerModel.findOne({ email: "test@gmail.com" }, (err, data) => {
+        if(!data){
+            res.status(200).json({ data: "Email Does Not Exists"});
+        }else if(CryptoJS.AES.decrypt(data.password, config.secretKey).toString(CryptoJS.enc.Utf8) == req.body.password){
+            res.status(200).json({ data: "correct"});
         }
     });
 });
