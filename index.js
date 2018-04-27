@@ -18,25 +18,33 @@ router.post('/', (req, res) => {
 });
 
 router.post('/register', (req,res) => {
-
+    let emailExists;
+    console.log(req.body);
     let registerdata = new registerModel({
         name : 12345,
         email : 'test@gmail.com',
         password: '3456'
     });
 
-    let ciphertext = CryptoJS.AES.encrypt(registerdata.password, config.secretKey); // encrypt password
-    // let bytes  = CryptoJS.AES.decrypt(ciphertext, config.secretKey).toString(CryptoJS.enc.Utf8); //decrypt password
-
-    registerdata.password = ciphertext;
-    
-    registerdata.save(registerdata, (err, data) => {
-        if(err)
-        res.status(200).json({error : err});
-         console.log(err, data);
+    registerModel.find({ email: "test1@gmail.com" }, (err, data) => {
+        if(data.length != 0)
+        {
+            res.status(200).json({ data: 'Email Already Exists'});
+        } else {
+            let ciphertext = CryptoJS.AES.encrypt(registerdata.password, config.secretKey); // encrypt password
+            // let bytes  = CryptoJS.AES.decrypt(ciphertext, config.secretKey).toString(CryptoJS.enc.Utf8); //decrypt password
+        
+            registerdata.password = ciphertext;
+            
+            // registerdata.save(registerdata, (err, data) => {
+            //     if(err)
+            //     res.status(200).json({error : err});
+            //      console.log(err, data);
+            // });
+        
+            res.status(200).json({ data : 'Registration Successful'});
+        }
     });
-
-    res.status(200).json({success : 'Registration Successful'});
 });
 
 app.use('/api', router);
