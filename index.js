@@ -50,7 +50,7 @@ router.post('/register', (req,res) => {
 
 router.post('/login', (req,res) => {
 
-    registerModel.findOne({ email: "test@gmail.com" }, (err, data) => {
+    registerModel.findOne({ email: req.body.email }, (err, data) => {
         if(!data){
             res.status(200).json({ data: "Email Does Not Exists"});
         }else if(CryptoJS.AES.decrypt(data.password, config.secretKey).toString(CryptoJS.enc.Utf8) == req.body.password){
