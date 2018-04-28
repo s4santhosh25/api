@@ -106,27 +106,26 @@ router.post('/verify', verifyToken, (req, res) => {
                 res
                     .status(401)
                     .json({auth: false, token: req.token, status: 'unauthorized'});
-                return;
+            } else {
+                console.log(decoded);
+                registerModel.findOne({
+                    email: decoded.email
+                }, (err, data) => {
+                    if (err) 
+                        console.log('err', err);
+                    console.log(data);
+                    if (req.token === data.token) {
+                        res
+                            .status(200)
+                            .json({auth: true, token: req.token, status: 'authorized'});
+                    } else {
+                        res
+                            .status(401)
+                            .json({auth: false, token: req.token, status: 'unauthorized'});
+                    }
+                });
             }
-            console.log(decoded);
-            registerModel.findOne({
-                email: decoded.email
-            }, (err, data) => {
-                if (err) 
-                    console.log('err', err);
-                console.log(data);
-                if (req.token === data.token) {
-                    res
-                        .status(200)
-                        .json({auth: true, token: req.token, status: 'authorized'});
-                } else {
-                    res
-                        .status(401)
-                        .json({auth: false, token: req.token, status: 'unauthorized'});
-                }
-            });
         });
-
 });
 
 function verifyToken(req, res, next) {
