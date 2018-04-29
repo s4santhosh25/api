@@ -56,7 +56,6 @@ router.post('/register', (req, res) => {
 });
 
 router.post('/login', (req, res) => {
-    debugger;
     console.log(req.body);
     registerModel.findOne({
         email: req.body.email
@@ -64,7 +63,7 @@ router.post('/login', (req, res) => {
         if (!data) {
             res
                 .status(200)
-                .json({data: "Email Does Not Exists"});
+                .json({data: "Email Does Not Exist"});
         } else if (CryptoJS.AES.decrypt(data.password, config.secretKey).toString(CryptoJS.enc.Utf8) == req.body.password) {
             let password = CryptoJS
                 .AES
@@ -130,11 +129,13 @@ router.post('/verify', verifyToken, (req, res) => {
 
 function verifyToken(req, res, next) {
     if (req.headers['authorization']) {
+        console.log('verifyToken', req.headers);
         req.token = req
             .headers['authorization']
             .split(' ')[1];
         next();
     } else {
+        console.log('verifyToken', req.headers);
         res.sendStatus(401);
     }
 }
