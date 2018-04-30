@@ -8,7 +8,7 @@ const config = require('./app/config');
 const registerModel = require('./app/model/mongodb/mongodb');
 const router = express.Router();
 
-const port = config.port;
+const port = process.env.port || config.port;
 
 app.use(cors());
 app.use(bodyParser.urlencoded({extended: true}));
