@@ -142,6 +142,12 @@ function verifyToken(req, res, next) {
 
 app.use('/api', router);
 
+app.get('/', (req, res) => {
+    res
+        .status(200)
+        .json({server: 'Active'});
+});
+
 app.listen(port, () => {
     console.log(`Running port at ${port}`);
 });
