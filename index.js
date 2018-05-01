@@ -8,7 +8,8 @@ const config = require('./app/config');
 const registerModel = require('./app/model/mongodb/mongodb');
 const router = express.Router();
 
-const port = process.env.port || config.port;
+const port = process.env.OPENSHIFT_NODEJS_PORT || config.port;
+const server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
 
 app.use(cors());
 app.use(bodyParser.urlencoded({extended: true}));
@@ -146,6 +147,6 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
-app.listen(port, () => {
-    console.log(`Running port at ${port}`);
+app.listen(port, server_ip_address, () => {
+    console.log("Listening on " + server_ip_address + ", port " + port);
 });
