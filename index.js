@@ -143,9 +143,7 @@ function verifyToken(req, res, next) {
 app.use('/api', router);
 
 app.get('/', (req, res) => {
-    res
-        .status(200)
-        .json({server: 'Active'});
+    res.sendFile(__dirname + '/index.html');
 });
 
 app.listen(port, () => {
