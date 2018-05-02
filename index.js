@@ -8,8 +8,7 @@ const config = require('./app/config');
 const registerModel = require('./app/model/mongodb/mongodb');
 const router = express.Router();
 
-const port = process.env.port || config.port;
-
+app.set('port', (process.env.PORT || config.port));
 app.use(cors());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
@@ -146,6 +145,6 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
-app.listen(port, () => {
-    console.log(`Running port at ${port}`);
-});
+app.listen(app.get('port'), function () {
+    console.log("Node app is running at localhost:" + app.get('port'));
+})
