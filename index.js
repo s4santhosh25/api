@@ -90,7 +90,7 @@ router.post('/login', (req, res) => {
 
             res
                 .status(200)
-                .json({data: "Login Successfull", token});
+                .json({data: "Login Successful", token});
         } else {
             res
                 .status(200)
