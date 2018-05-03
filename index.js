@@ -41,8 +41,10 @@ router.post('/register', (req, res) => {
             registerdata.password = ciphertext;
 
             registerdata.save(registerdata, (err, data) => {
-                if (err) 
-                    console.log(err);
+                if (err){
+					console.log(err);
+					res.status(200).json({data: err});
+				} 
                 console.log(data);
             });
             // res.status(200).json({error : err});      console.log(err, data); });
