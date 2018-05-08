@@ -111,7 +111,7 @@ router.post('/verify', verifyToken, (req, res) => {
         .verify(req.token, config.secretKey, function (err, decoded) {
             if (err) {
                 res
-                    .status(401)
+                    .status(200)
                     .json({auth: false, token: req.token, status: 'unauthorized'});
             } else {
                 console.log(decoded);
@@ -127,7 +127,7 @@ router.post('/verify', verifyToken, (req, res) => {
                             .json({auth: true, token: req.token, status: 'authorized'});
                     } else {
                         res
-                            .status(401)
+                            .status(200)
                             .json({auth: false, token: req.token, status: 'unauthorized'});
                     }
                 });
@@ -144,7 +144,9 @@ function verifyToken(req, res, next) {
         next();
     } else {
         console.log('verifyToken', req.headers);
-        res.sendStatus(401);
+        res
+        .status(200)
+        .json({auth: false, token: req.token, status: 'unauthorized'});
     }
 }
 
