@@ -145,8 +145,8 @@ function verifyToken(req, res, next) {
     } else {
         console.log('verifyToken', req.headers);
         res
-        .status(200)
-        .json({auth: false, token: req.token, status: 'unauthorized'});
+            .status(200)
+            .json({auth: false, token: req.token, status: 'unauthorized'});
     }
 }
 
@@ -162,30 +162,29 @@ server.listen(app.get('port'), function () {
 
 /* Socket.io */
 
-// io.on("connection", socket => {
-    // console.log("New client connected"),
+io.on("connection", socket => {
+    console.log("New client connected"),
 
-    // socket.emit("FromAPI", {test: 'HI from server'});
+    socket.emit("FromAPI", {test: 'HI from server'});
 
-    // socket.on("clientMsg", (data) => {
-        // console.log(data);
-        // socket.broadcast.to('roomA').emit('ack', {
-            // text: data.text
-        // })
-    // });
+    socket.on("clientMsg", (data) => {
+        console.log(data);
+        socket
+            .broadcast
+            .to('roomA')
+            .emit('ack', {text: data.text})
+    });
 
-    // socket.on("disconnect", () => console.log("Client disconnected"));
+    socket.on("disconnect", () => console.log("Client disconnected"));
 
-    // socket.on('join', (params, callback) => {
-        // if (!params.room) {
-            // callback('Name and room name are required.');
-        // }
-        // socket.join(params.room);
-        // // socket.emit('newMessage', {'Admin': 'Welcome to the chat app'});
-        // // socket
-        // //     .broadcast
-        // //     .to(params.room)
-        // //     .emit('newMessage', {'Admin': 'RoomA has joined.'});
-        // callback();
-    // });
-// });
+    socket.on('join', (params, callback) => {
+        if (!params.room) {
+            callback('Name and room name are required.');
+        }
+        socket.join(params.room);
+        // socket.emit('newMessage', {'Admin': 'Welcome to the chat app'}); socket
+        // .broadcast     .to(params.room)     .emit('newMessage', {'Admin': 'RoomA has
+        // joined.'});
+        callback();
+    });
+});
