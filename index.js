@@ -5,6 +5,8 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const CryptoJS = require("crypto-js");
 const config = require('./app/config');
+const http = require("http");
+const socketIo = require("socket.io");
 const registerModel = require('./app/model/mongodb/mongodb');
 const router = express.Router();
 
@@ -12,6 +14,9 @@ app.set('port', (process.env.PORT || config.port));
 app.use(cors());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
+
+const server = http.createServer(app);
+const io = socketIo(server);
 
 router.post('/', (req, res) => {
     res
@@ -41,10 +46,12 @@ router.post('/register', (req, res) => {
             registerdata.password = ciphertext;
 
             registerdata.save(registerdata, (err, data) => {
-                if (err){
-					console.log(err);
-					res.status(200).json({data: err});
-				} 
+                if (err) {
+                    console.log(err);
+                    res
+                        .status(200)
+                        .json({data: err});
+                }
                 console.log(data);
             });
             // res.status(200).json({error : err});      console.log(err, data); });
@@ -147,6 +154,36 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
-app.listen(app.get('port'), function () {
+server.listen(app.get('port'), function () {
     console.log("Node app is running at localhost:" + app.get('port'));
 })
+
+/* Socket.io */
+
+io.on("connection", socket => {
+    console.log("New client connected"),
+
+    socket.emit("FromAPI", {test: 'HI from server'});
+
+    socket.on("clientMsg", (data) => {
+        console.log(data);
+        socket.broadcast.to('roomA').emit('ack', {
+            text: data.text
+        })
+    });
+
+    socket.on("disconnect", () => console.log("Client disconnected"));
+
+    socket.on('join', (params, callback) => {
+        if (!params.room) {
+            callback('Name and room name are required.');
+        }
+        socket.join(params.room);
+        // socket.emit('newMessage', {'Admin': 'Welcome to the chat app'});
+        // socket
+        //     .broadcast
+        //     .to(params.room)
+        //     .emit('newMessage', {'Admin': 'RoomA has joined.'});
+        callback();
+    });
+});
