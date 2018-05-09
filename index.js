@@ -80,8 +80,9 @@ router.post('/login', (req, res) => {
 
             let token = jwt.sign({
                 email: data.email,
+                name : data.name,
                 password
-            }, config.secretKey)
+            }, config.secretKey, {expiresIn: '1h'})
 
             registerModel.update({
                 email: data.email
@@ -137,13 +138,11 @@ router.post('/verify', verifyToken, (req, res) => {
 
 function verifyToken(req, res, next) {
     if (req.headers['authorization']) {
-        console.log('verifyToken', req.headers);
         req.token = req
             .headers['authorization']
             .split(' ')[1];
         next();
     } else {
-        console.log('verifyToken', req.headers);
         res
             .status(200)
             .json({auth: false, token: req.token, status: 'unauthorized'});
