@@ -7,7 +7,7 @@ const CryptoJS = require("crypto-js");
 const config = require('./app/config');
 const http = require("http");
 const socketIo = require("socket.io");
-const registerModel = require('./app/model/mongodb/mongodb');
+const {registerModel, chatModel} = require('./app/model/mongodb/mongodb');
 const router = express.Router();
 
 app.set('port', (process.env.PORT || config.port));
@@ -80,7 +80,7 @@ router.post('/login', (req, res) => {
 
             let token = jwt.sign({
                 email: data.email,
-                name : data.name,
+                name: data.name,
                 password
             }, config.secretKey, {expiresIn: '1h'})
 
@@ -149,6 +149,41 @@ function verifyToken(req, res, next) {
     }
 }
 
+router.post('/chat', verifyToken, (req, res) => {
+    jwt
+        .verify(req.token, config.secretKey, function (err, decoded) {
+            if (err) {
+                res
+                    .status(200)
+                    .json({auth: false, token: req.token, status: 'unauthorized'});
+            } else {
+                console.log(decoded);
+
+                registerModel.findOne({
+                    email: decoded.email
+                }, (err, regData) => {
+                    if (err) 
+                        console.log('err', err);
+                    console.log(regData);
+                    if (req.token === regData.token) {
+                        chatModel.find({}, (err, data) => {
+                            if (err) 
+                                console.log('err', err);
+                            console.log(data);
+                            res
+                                .status(200)
+                                .json({auth: true, token: req.token, status: 'authorized', data});
+                        });
+                    } else {
+                        res
+                            .status(200)
+                            .json({auth: false, token: req.token, status: 'unauthorized'});
+                    }
+                });
+            }
+        });
+});
+
 app.use('/api', router);
 
 app.get('/', (req, res) => {
@@ -167,7 +202,14 @@ io.on("connection", socket => {
     socket.emit("FromAPI", {test: 'HI from server'});
 
     socket.on("clientMsg", (data) => {
-        console.log(data);
+        let chatdata = new chatModel({name: data.name, date: data.date.toString(), message: data.text});
+        console.log('chatdata', chatdata);
+        chatdata.save(chatdata, (err, data1) => {
+            if (err) {
+                console.log(err);
+            }
+            console.log('chatdata.save', data1);
+        });
         socket
             .broadcast
             .to('roomA')
@@ -181,9 +223,6 @@ io.on("connection", socket => {
             callback('Name and room name are required.');
         }
         socket.join(params.room);
-        // socket.emit('newMessage', {'Admin': 'Welcome to the chat app'}); socket
-        // .broadcast     .to(params.room)     .emit('newMessage', {'Admin': 'RoomA has
-        // joined.'});
         callback();
     });
 });

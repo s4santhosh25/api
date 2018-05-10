@@ -24,6 +24,25 @@ const registerSchema = new Schema({
   }
 });
 
-const registerModel = mongoose.model('register', registerSchema, 'Registration');
+const chatSchema = new Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  date: {
+    type: String,
+    required: true
+  },
+  message: {
+    type: String,
+    required: true
+  }
+});
 
-module.exports = registerModel;
+const registerModel = mongoose.model('register', registerSchema, 'Registration');
+const chatModel = mongoose.model('chat', chatSchema, 'Chatbox');
+
+module.exports = {
+  registerModel,
+  chatModel
+};
