@@ -213,7 +213,7 @@ io.on("connection", socket => {
         socket
             .broadcast
             .to('roomA')
-            .emit('ack', {text: data.text})
+            .emit('ack', chatdata)
     });
 
     socket.on("disconnect", () => console.log("Client disconnected"));
