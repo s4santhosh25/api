@@ -30,6 +30,7 @@
     "express": "^4.16.3",
     "jsonwebtoken": "^8.2.1",
     "mongoose": "^5.0.16",
+    "nodemailer": "^4.6.4",
     "socket.io": "^2.1.0"
   },
   "engines": {

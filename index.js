@@ -7,6 +7,7 @@ const CryptoJS = require("crypto-js");
 const config = require('./app/config');
 const http = require("http");
 const socketIo = require("socket.io");
+const transporter = require('././app/helper/nodemailer');
 const {registerModel, chatModel} = require('./app/model/mongodb/mongodb');
 const router = express.Router();
 
@@ -149,6 +150,43 @@ function verifyToken(req, res, next) {
     }
 }
 
+router.post('/forgetPassword', (req, res) => {
+    registerModel.findOne({
+        email: req.body.mailid
+    }, (err, data) => {
+        if (!data) {
+            res
+                .status(200)
+                .json({data: "Email Does Not Exist"});
+        } else if (data) {
+            let password = CryptoJS
+                .AES
+                .decrypt(data.password, config.secretKey)
+                .toString(CryptoJS.enc.Utf8);
+            console.log('CryptoJS', data);
+
+            const mailOptions = {
+                from: 'testmarvel007@gmail.com',
+                to: data.email,
+                subject: 'Password',
+                html: password
+            };
+
+            transporter.sendMail(mailOptions, function (err, info) {
+                if (err) 
+                    res.status(200).json({data: err});
+                else 
+                    console.log(info);
+                }
+            );
+
+            res
+                .status(200)
+                .json({data: "Email Exist", status: `Password Sent To Your ${data.email} Mail Account`});
+        }
+    })
+});
+
 router.post('/chat', verifyToken, (req, res) => {
     jwt
         .verify(req.token, config.secretKey, function (err, decoded) {
@@ -197,18 +235,23 @@ server.listen(app.get('port'), function () {
 /* Socket.io */
 
 io.on("connection", socket => {
-    console.log("New client connected"),
+    console.log("New client connected", socket),
 
     socket.emit("FromAPI", {test: 'HI from server'});
 
     socket.on("clientMsg", (data) => {
-        let chatdata = new chatModel({name: data.name, date: data.date.toString(), message: data.text});
-        console.log('chatdata', chatdata);
+        let chatdata = new chatModel({
+            name: data.name,
+            date: data
+                .date
+                .toString(),
+            message: data.text
+        });
+        console.log('chatdata', data);
         chatdata.save(chatdata, (err, data1) => {
             if (err) {
                 console.log(err);
             }
-            console.log('chatdata.save', data1);
         });
         socket
             .broadcast
